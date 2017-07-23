@@ -1,0 +1,11 @@
+1: type this command: "git clone https://github.com/himynames3r1c/spotigrab"
+2: type this command: "ffmpeg -f pulse -i default out.mp3" """dont close"""
+3: type pavucontrol: goto recording: change first one to "Monitor of Built-in Audio Analog Stereo"
+4: close pavuconrol
+5: start spotfy
+6: start spotigrab.py(Will close first time)
+7: unpause current song then just let the songs play and youll get them 
+
+Bugs:
+1: turn up volume interrupts the recording
+2: files dont go to folder not finished yet will be finished soon
