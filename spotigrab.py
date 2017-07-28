@@ -4,10 +4,18 @@ import os
 import time
 import sys
 import subprocess
+import glob
 
 def numberdestroyer(string):
 	string = string.translate(None,"1234567890")
 	return string
+
+def customformat(nonformattedfile):
+	nonformattedfile = nonformattedfile.replace(" ", "_")
+	nonformattedfile = nonformattedfile.replace("/", "1")
+	nonformattedfile = nonformattedfile + ".mp3"
+	formatedfile = nonformattedfile
+	return formatedfile
 
 def spotifyinfograbber():
 	session_bus = dbus.SessionBus()
@@ -41,11 +49,23 @@ def filechecker():
 		except OSError:
 			pass
 	info = spotifyinfograbber()
+	outformat = info.replace(" ", "_")
+	outformat = outformat.replace("/", "1")
+	outformat = outformat + ".mp3"
+	num1 = 0
+	scanlimit = len(directory)
+	scanlimit = int(scanlimit) 
 	for song in directory:
-		if info == song:
-			return ("RECORDFALSE")
+		if song == outformat:
+			record = False
+			break
 		else:
-			return ("RECORD")
+			record = True
+	if record == True:
+		return "RECORD"
+	else:
+		return "RECORDFALSE"
+		
 
 def record(songinfo):
 	songinfo = songinfo.replace(" ", "_")
@@ -57,7 +77,7 @@ def record(songinfo):
 #Ask if spotfiy is running
 def main():
 	while True:
-		choice = "y"
+		choice = raw_input("Is spotify running (Y/N) :")
 		choice = choice.upper()
 		if choice == "Y":
 			info = spotifyinfograbber()
@@ -72,12 +92,23 @@ def main():
 							rec = record(info)
 					else:
 						rec.kill()
-						#Move files to mp3files folder and remove _ in spaces and 1 is slashes
+						mp3files = glob.glob("*mp3")
+						for mp3file in mp3files:
+							os.system("mv %s mp3files/" %mp3file)
+							try:
+								os.remove(mp3file)
+							except OSError:
+								pass
+							
+							
+						
 						os.system("./spotigrab.py")
 			else:
-				sys.exit()
-			
+				print "Song already exists in mp3files directory please listen to it or skip"
+				while True:
+					if info == spotifyinfograbber():
+						pass
+					else:
+						os.system("./spotigrab.py")
 
 main()
-#maybe implement method to see if spotify is running
-#perhaps make an api with web api
