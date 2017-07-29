@@ -16,7 +16,7 @@ def customformat(nonformattedfile):
 	nonformattedfile = nonformattedfile + ".mp3"
 	formatedfile = nonformattedfile
 	return formatedfile
-
+#grabs the artist and title of the current spotify song your listening
 def spotifyinfograbber():
 	session_bus = dbus.SessionBus()
 	spotify_bus = session_bus.get_object("org.mpris.MediaPlayer2.spotify","/org/mpris/MediaPlayer2")
@@ -28,11 +28,12 @@ def spotifyinfograbber():
 	title = metadata['xesam:title']
 	info = ("%s, %s"%(title,artist))
 	return info
-
+#similar to the "touch" bash command
 def touch(name):
     with open(path, 'a'):
         os.utime(path, None)
 
+#Looks for an mp3files directory if not found it makes on,it also checks for songs so you dont record the same song over and over again.
 def filechecker():
 	try:
 		os.listdir("mp3files")
@@ -51,6 +52,8 @@ def filechecker():
 	info = spotifyinfograbber()
 	outformat = info.replace(" ", "_")
 	outformat = outformat.replace("/", "1")
+	outformat = outformat.replace("'",",")
+	outformat = outformat.replace('"',',')
 	outformat = outformat + ".mp3"
 	num1 = 0
 	scanlimit = len(directory)
@@ -66,49 +69,49 @@ def filechecker():
 	else:
 		return "RECORDFALSE"
 		
-
+#starts ffmpeg
 def record(songinfo):
 	songinfo = songinfo.replace(" ", "_")
-	songinfo = songinfo.replace("/","1") #AC/DC SHOWED ME THIS
+	songinfo = songinfo.replace("/","1")
+	songinfo = songinfo.replace("'",",")
+	songinfo = songinfo.replace('"',',')
+	print songinfo
 	songinfo = songinfo + ".mp3"
 	rec = subprocess.Popen(["ffmpeg", "-f", "pulse", "-i", "default", songinfo])
 	return rec
 
-#Ask if spotfiy is running
+#puts everything together and restarts the program when finished :)
 def main():
 	while True:
-		choice = raw_input("Is spotify running (Y/N) :")
-		choice = choice.upper()
-		if choice == "Y":
-			info = spotifyinfograbber()
-			checkfiles = filechecker()
-			if checkfiles == "RECORD":
-				while True:
-					if info == spotifyinfograbber():
+		info = spotifyinfograbber()
+		checkfiles = filechecker()
+		if checkfiles == "RECORD":
+			while True:
+				if info == spotifyinfograbber():
+					try:
+						if rec:
+							pass
+					except NameError:
+						rec = record(info)
+				else:
+					rec.kill()
+					mp3files = glob.glob("*mp3")
+					for mp3file in mp3files:
+						os.system("mv %s mp3files/" %mp3file)
 						try:
-							if rec:
-								pass
-						except NameError:
-							rec = record(info)
-					else:
-						rec.kill()
-						mp3files = glob.glob("*mp3")
-						for mp3file in mp3files:
-							os.system("mv %s mp3files/" %mp3file)
-							try:
-								os.remove(mp3file)
-							except OSError:
-								pass
-							
-							
+							os.remove(mp3file)
+						except OSError:
+							pass
 						
-						os.system("./spotigrab.py")
-			else:
-				print "Song already exists in mp3files directory please listen to it or skip"
-				while True:
-					if info == spotifyinfograbber():
-						pass
-					else:
-						os.system("./spotigrab.py")
+						
+					
+					os.system("./spotigrab.py")
+		else:
+			print "Song already exists in mp3files directory please listen to it or skip"
+			while True:
+				if info == spotifyinfograbber():
+					pass
+				else:
+					os.system("./spotigrab.py")
 
 main()
